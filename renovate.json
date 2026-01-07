@@ -1,0 +1,68 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices"
+  ],
+  "prConcurrentLimit": 0,
+  "prHourlyLimit": 0,
+  "packageRules": [
+    {
+      "description": "Auto-merge all minor, patch, pin, and digest updates",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Group yt-dlp updates",
+      "groupName": "yt-dlp",
+      "matchDepNames": [
+        "yt-dlp/yt-dlp"
+      ]
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Update Deno version in Dockerfile",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Dockerfile$/"
+      ],
+      "matchStrings": [
+        "ARG DENO_VERSION=\"(?<currentValue>.*?)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "denoland/deno",
+      "extractVersionTemplate": "^v?(?<version>.*)$"
+    },
+    {
+      "description": "Update yt-dlp version in Dockerfiles",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Dockerfile$/",
+        "/^alpine\\.Dockerfile$/"
+      ],
+      "matchStrings": [
+        "ARG YT_DLP_VERSION=\"(?<currentValue>.*?)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "yt-dlp/yt-dlp"
+    },
+    {
+      "description": "Update Bun version in alpine.Dockerfile",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^alpine\\.Dockerfile$/"
+      ],
+      "matchStrings": [
+        "ARG BUN_VERSION=\"(?<currentValue>.*?)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "oven-sh/bun",
+      "extractVersionTemplate": "^bun-v(?<version>.*)$"
+    }
+  ]
+}
