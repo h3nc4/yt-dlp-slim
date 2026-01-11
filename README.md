@@ -16,6 +16,16 @@ yt-dlp() {
 }
 ```
 
+Or wrapper script for [mpv](https://mpv.io/) integration:
+
+```bash
+tee /usr/local/bin/yt-dlp << 'EOF' >/dev/null
+#!/bin/sh
+exec docker run --rm -u "$(id -u):$(id -g)" -v "${PWD}:/target" h3nc4/yt-dlp-slim "$@"
+EOF
+chmod +x /usr/local/bin/yt-dlp
+```
+
 Alpine variant:
 
 ```bash
