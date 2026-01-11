@@ -5,14 +5,14 @@ Distroless Docker container for [yt-dlp](https://github.com/yt-dlp/yt-dlp) with 
 ## Usage
 
 ```bash
-docker run --rm -v "$PWD:/target" h3nc4/yt-dlp-slim [OPTIONS] URL [URL...]
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/target" h3nc4/yt-dlp-slim [OPTIONS] URL [URL...]
 ```
 
 Shell function for convenience:
 
 ```bash
 yt-dlp() {
-  docker run --rm -v "$PWD:/target" h3nc4/yt-dlp-slim "$@"
+  docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/target" h3nc4/yt-dlp-slim "$@"
 }
 ```
 
