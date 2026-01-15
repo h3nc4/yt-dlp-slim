@@ -8,6 +8,13 @@ on:
       - "Dockerfile"
       - "alpine.Dockerfile"
       - ".github/workflows/publish-image.yaml"
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - "Dockerfile"
+      - "alpine.Dockerfile"
+      - ".github/workflows/publish-image.yaml"
 
 jobs:
   build-push:
@@ -30,6 +37,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Run docker/login-action
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
@@ -44,7 +52,7 @@ jobs:
         with:
           context: .
           file: ./${{ matrix.dockerfile }}
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{ matrix.tag }}
             ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.IMAGE_NAME }}:${{ matrix.sha_prefix }}${{ steps.sha.outputs.short }}
