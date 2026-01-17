@@ -49,7 +49,7 @@ RUN chmod 755 /rootfs/usr/local/bin/yt-dlp
 
 ################################################################################
 # Assemble runtime image
-FROM gcr.io/distroless/base-debian13@sha256:f8425b0781786abafa2712aeddbcf2441b535e594d105f23a02b502d5501057e AS assemble
+FROM gcr.io/distroless/base-debian13@sha256:0e299959b841de2aef4259d411c23826a2276e019a5ffea141245679a1d95b46 AS assemble
 
 COPY --from=deno-builder /deno /usr/local/bin/deno
 COPY --from=yt-dlp-builder /rootfs /
