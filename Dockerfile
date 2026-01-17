@@ -30,7 +30,7 @@ RUN unzip /deno.zip && \
 
 ################################################################################
 # FFmpeg builder stage
-FROM debian:13-slim@sha256:4bcb9db66237237d03b55b969271728dd3d955eaaa254b9db8a3db94550b1885 AS ffmpeg-builder
+FROM debian:13-slim@sha256:77ba0164de17b88dd0bf6cdc8f65569e6e5fa6cd256562998b62553134a00ef0 AS ffmpeg-builder
 RUN apt-get update && \
   apt-get install -y --no-install-recommends ffmpeg
 RUN mkdir -p /rootfs/usr/bin && \
