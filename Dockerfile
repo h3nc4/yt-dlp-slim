@@ -34,7 +34,7 @@ FROM debian:13-slim@sha256:77ba0164de17b88dd0bf6cdc8f65569e6e5fa6cd256562998b625
 RUN apt-get update && \
   apt-get install -y --no-install-recommends ffmpeg
 RUN mkdir -p /rootfs/usr/bin && \
-  cp /usr/bin/ffmpeg /rootfs/usr/bin/ffmpeg && \
+  cp /usr/bin/ffmpeg /usr/bin/ffprobe /rootfs/usr/bin/ && \
   ldd /usr/bin/ffmpeg | grep "=> /" | awk '{print $3}' | \
   xargs -I '{}' cp --parents '{}' /rootfs
 
