@@ -33,38 +33,37 @@ RUN unzip /deno.zip && \
 FROM debian:13-slim@sha256:77ba0164de17b88dd0bf6cdc8f65569e6e5fa6cd256562998b62553134a00ef0 AS ffmpeg-builder
 RUN apt-get update && \
   apt-get install -y --no-install-recommends ffmpeg
-RUN mkdir -p /rootfs/usr/bin && \
-  cp /usr/bin/ffmpeg /usr/bin/ffprobe /rootfs/usr/bin/ && \
+RUN mkdir -p /rootfs/bin && \
+  cp /usr/bin/ffmpeg /usr/bin/ffprobe /rootfs/bin/ && \
   ldd /usr/bin/ffmpeg | grep "=> /" | awk '{print $3}' | \
-  xargs -I '{}' cp --parents '{}' /rootfs
+  xargs -I '{}' cp --parents '{}' /rootfs && \
+  cp --parents /lib/x86_64-linux-gnu/libdl.so.2 /rootfs && \
+  cp --parents /lib/x86_64-linux-gnu/libpthread.so.0 /rootfs && \
+  cp --parents /lib/x86_64-linux-gnu/libutil.so.1 /rootfs && \
+  cp --parents /lib/x86_64-linux-gnu/librt.so.1 /rootfs && \
+  cp --parents /lib64/ld-linux-x86-64.so.2 /rootfs
 
 ################################################################################
 # YT-DLP builder stage
 FROM busybox:musl@sha256:03db190ed4c1ceb1c55d179a0940e2d71d42130636a780272629735893292223 AS yt-dlp-builder
 ARG YT_DLP_VERSION
 
-RUN mkdir -p /rootfs/usr/local/bin /rootfs/target
-ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp_linux" /rootfs/usr/local/bin/yt-dlp
-RUN chmod 755 /rootfs/usr/local/bin/yt-dlp
-
-################################################################################
-# Assemble runtime image
-FROM gcr.io/distroless/base-debian13@sha256:0e299959b841de2aef4259d411c23826a2276e019a5ffea141245679a1d95b46 AS assemble
-
-COPY --from=deno-builder /deno /usr/local/bin/deno
-COPY --from=yt-dlp-builder /rootfs /
-COPY --from=ffmpeg-builder /rootfs/usr /usr
-COPY --from=ffmpeg-builder /rootfs/lib /lib
+RUN mkdir -p /rootfs/target /rootfs/tmp
+ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp_linux" /rootfs/bin/yt-dlp
+RUN chmod 755 /rootfs/bin/yt-dlp && \
+  chmod 1777 /rootfs/tmp
 
 ################################################################################
 # Final squashed image
 FROM scratch AS final
 
-COPY --from=assemble "/" "/"
+COPY --from=deno-builder /deno /bin/deno
+COPY --from=yt-dlp-builder /rootfs /
+COPY --from=ffmpeg-builder /rootfs/ /
 
 WORKDIR /target
 # deno is yt-dlp's default JS runtime
-ENTRYPOINT ["/usr/local/bin/yt-dlp"]
+ENTRYPOINT ["/bin/yt-dlp"]
 CMD ["--help"]
 
 LABEL org.opencontainers.image.title="yt-dlp Slim" \
