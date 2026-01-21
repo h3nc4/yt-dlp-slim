@@ -16,19 +16,8 @@
 
 ########################################
 # Versions
-ARG BUN_VERSION="1.3.6"
 ARG YT_DLP_VERSION="2025.12.08"
 ARG ALPINE_VERSION="3.23@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62"
-
-################################################################################
-# Bun builder stage
-FROM alpine:${ALPINE_VERSION} AS bun-builder
-ARG BUN_VERSION
-
-ADD "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64-musl.zip" /tmp/bun.zip
-RUN unzip /tmp/bun.zip -d /tmp && \
-  mv /tmp/bun-linux-x64-musl/bun /bun && \
-  chmod 755 /bun
 
 ################################################################################
 # YT-DLP builder stage
@@ -42,24 +31,31 @@ RUN chmod 755 /yt-dlp
 # Assemble runtime image
 FROM alpine:${ALPINE_VERSION} AS assemble
 
-RUN apk add --no-cache ffmpeg
+RUN apk add --no-cache ffmpeg quickjs
 
-COPY --from=bun-builder /bun /usr/local/bin/bun
-COPY --from=yt-dlp-builder /yt-dlp /usr/local/bin/yt-dlp
+RUN mkdir -p /rootfs/bin && \
+  cp /usr/bin/ffmpeg /usr/bin/ffprobe /usr/bin/qjs /rootfs/bin/ && \
+  ldd /usr/bin/ffmpeg | grep "=> /" | awk '{print $3}' | \
+  xargs -I '{}' cp --parents '{}' /rootfs && \
+  cp --parents /lib/ld-musl-x86_64.so.1 /rootfs
+
+RUN mkdir -p /rootfs/target /rootfs/tmp && \
+  chmod 1777 /rootfs/tmp
 
 ################################################################################
 # Final squashed image
 FROM scratch AS final
 
-COPY --from=assemble "/" "/"
+COPY --from=yt-dlp-builder /yt-dlp /bin/yt-dlp
+COPY --from=assemble /rootfs /
 
 WORKDIR /target
-# must specify bun as JS runtime
-ENTRYPOINT ["/usr/local/bin/yt-dlp", "--js-runtimes", "bun:/usr/local/bin/bun"]
+# must specify qjs as JS runtime
+ENTRYPOINT ["/bin/yt-dlp", "--js-runtimes", "quickjs:/bin/qjs"]
 CMD ["--help"]
 
 LABEL org.opencontainers.image.title="yt-dlp Slim" \
-  org.opencontainers.image.description="An Alpine yt-dlp container with Bun and FFmpeg" \
+  org.opencontainers.image.description="An Alpine yt-dlp container with QuickJS and FFmpeg" \
   org.opencontainers.image.authors="Henrique Almeida <me@h3nc4.com>" \
   org.opencontainers.image.vendor="Henrique Almeida" \
   org.opencontainers.image.licenses="GPL-3.0-or-later" \

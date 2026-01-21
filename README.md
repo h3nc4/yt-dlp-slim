@@ -2,6 +2,10 @@
 
 Distroless Docker container for [yt-dlp](https://github.com/yt-dlp/yt-dlp) with JavaScript and FFmpeg support.
 
+The default image uses [Deno](https://deno.land/) as JavaScript runtime and weighs <400MB.
+
+An Alpine-based variant with [QuickJS](https://bellard.org/quickjs/) as JavaScript runtime is also available, weighing <120MB.
+
 ## Usage
 
 ```bash
@@ -26,7 +30,7 @@ EOF
 chmod +x /usr/local/bin/yt-dlp
 ```
 
-Alpine variant:
+Distroless Alpine variant:
 
 ```bash
 docker run --rm -v "$PWD:/target" h3nc4/yt-dlp-slim:alpine [OPTIONS] URL [URL...]
