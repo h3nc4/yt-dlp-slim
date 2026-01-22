@@ -21,12 +21,7 @@ ARG YT_DLP_VERSION="2025.12.08"
 
 ################################################################################
 # Deno builder stage
-FROM busybox:musl@sha256:03db190ed4c1ceb1c55d179a0940e2d71d42130636a780272629735893292223 AS deno-builder
-ARG DENO_VERSION
-
-ADD "https://dl.deno.land/release/v${DENO_VERSION}/deno-x86_64-unknown-linux-gnu.zip" /deno.zip
-RUN unzip /deno.zip && \
-  chmod 755 /deno
+FROM denoland/deno:bin-2.6.6 AS deno-builder
 
 ################################################################################
 # FFmpeg builder stage
@@ -45,12 +40,23 @@ RUN mkdir -p /rootfs/bin && \
 
 ################################################################################
 # YT-DLP builder stage
-FROM busybox:musl@sha256:03db190ed4c1ceb1c55d179a0940e2d71d42130636a780272629735893292223 AS yt-dlp-builder
+FROM alpine:3.23@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62 AS yt-dlp-builder
 ARG YT_DLP_VERSION
 
-RUN mkdir -p /rootfs/target /rootfs/tmp
-ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp_linux" /rootfs/bin/yt-dlp
-RUN chmod 755 /rootfs/bin/yt-dlp && \
+RUN mkdir -p /rootfs/target /rootfs/tmp /rootfs/bin
+
+ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp_linux" /yt-dlp_linux
+ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/SHA2-256SUMS" /SHA2-256SUMS
+ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/SHA2-256SUMS.sig" /SHA2-256SUMS.sig
+ADD "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xAC0CBBE6848D6A873464AF4E57CF65933B5A7581" "/yt-dlp_pubkey.asc"
+
+RUN apk add --no-cache gnupg && \
+  gpg --import /yt-dlp_pubkey.asc && \
+  gpg --verify /SHA2-256SUMS.sig /SHA2-256SUMS && \
+  grep " yt-dlp_linux$" /SHA2-256SUMS | sha256sum -c -
+
+RUN mv /yt-dlp_linux /rootfs/bin/yt-dlp && \
+  chmod 755 /rootfs/bin/yt-dlp && \
   chmod 1777 /rootfs/tmp
 
 ################################################################################

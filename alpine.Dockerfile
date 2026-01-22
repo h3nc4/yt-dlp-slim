@@ -24,8 +24,18 @@ ARG ALPINE_VERSION="3.23@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed
 FROM alpine:${ALPINE_VERSION} AS yt-dlp-builder
 ARG YT_DLP_VERSION
 
-ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp_musllinux" /yt-dlp
-RUN chmod 755 /yt-dlp
+ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp_musllinux" /yt-dlp_musllinux
+ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/SHA2-256SUMS" /SHA2-256SUMS
+ADD "https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/SHA2-256SUMS.sig" /SHA2-256SUMS.sig
+ADD "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xAC0CBBE6848D6A873464AF4E57CF65933B5A7581" "/yt-dlp_pubkey.asc"
+
+RUN apk add --no-cache gnupg && \
+  gpg --import /yt-dlp_pubkey.asc && \
+  gpg --verify /SHA2-256SUMS.sig /SHA2-256SUMS && \
+  grep " yt-dlp_musllinux$" /SHA2-256SUMS | sha256sum -c -
+
+RUN mv /yt-dlp_musllinux /yt-dlp && \
+  chmod 755 /yt-dlp
 
 ################################################################################
 # Assemble runtime image
