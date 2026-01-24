@@ -20,7 +20,7 @@ ARG YT_DLP_VERSION="2025.12.08"
 
 ################################################################################
 # Deno builder stage
-FROM denoland/deno:bin-2.6.6 AS deno-builder
+FROM denoland/deno:bin-2.6.6@sha256:9f18d20207f2699595ea26d14e0b7e123cd0cd01100a577bc11f8ca5906c2d81 AS deno-builder
 
 ################################################################################
 # FFmpeg builder stage
