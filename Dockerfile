@@ -24,7 +24,7 @@ FROM denoland/deno:bin-2.6.6@sha256:9f18d20207f2699595ea26d14e0b7e123cd0cd01100a
 
 ################################################################################
 # FFmpeg builder stage
-FROM debian:13-slim@sha256:77ba0164de17b88dd0bf6cdc8f65569e6e5fa6cd256562998b62553134a00ef0 AS ffmpeg-builder
+FROM debian:13-slim@sha256:f6e2cfac5cf956ea044b4bd75e6397b4372ad88fe00908045e9a0d21712ae3ba AS ffmpeg-builder
 RUN apt-get update && \
   apt-get install -y --no-install-recommends ffmpeg
 RUN mkdir -p /rootfs/bin && \
