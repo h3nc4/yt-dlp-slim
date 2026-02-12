@@ -37,8 +37,9 @@
       "matchStrings": [
         "ARG YT_DLP_VERSION=\"(?<currentValue>.*?)\""
       ],
-      "datasourceTemplate": "github-releases",
-      "depNameTemplate": "yt-dlp/yt-dlp"
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "yt-dlp/yt-dlp",
+      "versioningTemplate": "regex:^(?<major>\\d{4})\\.(?<minor>\\d{2})\\.(?<patch>\\d{2})$"
     },
     {
       "description": "Update Bun version in alpine.Dockerfile",
