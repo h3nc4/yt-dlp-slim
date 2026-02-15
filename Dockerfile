@@ -67,6 +67,7 @@ COPY --from=yt-dlp-builder /rootfs /
 COPY --from=ffmpeg-builder /rootfs/ /
 
 WORKDIR /target
+ENV XDG_CACHE_HOME=/tmp/.cache
 # deno is yt-dlp's default JS runtime
 ENTRYPOINT ["/bin/yt-dlp"]
 CMD ["--help"]

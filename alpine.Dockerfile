@@ -60,6 +60,7 @@ COPY --from=yt-dlp-builder /yt-dlp /bin/yt-dlp
 COPY --from=assemble /rootfs /
 
 WORKDIR /target
+ENV XDG_CACHE_HOME=/tmp/.cache
 # must specify qjs as JS runtime
 ENTRYPOINT ["/bin/yt-dlp", "--js-runtimes", "quickjs:/bin/qjs"]
 CMD ["--help"]
