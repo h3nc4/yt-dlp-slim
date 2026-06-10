@@ -39,7 +39,7 @@ RUN mkdir -p /rootfs/bin && \
 
 ################################################################################
 # YT-DLP builder stage
-FROM alpine:3.24@sha256:8ddefa941e689fc29abcdeb8dae3b3c6d139cc08ce9a52633931160701770685 AS yt-dlp-builder
+FROM alpine:3.24@sha256:a2d49ea686c2adfe3c992e47dc3b5e7fa6e6b5055609400dc2acaeb241c829f4 AS yt-dlp-builder
 ARG YT_DLP_VERSION
 
 RUN mkdir -p /rootfs/target /rootfs/tmp /rootfs/bin
