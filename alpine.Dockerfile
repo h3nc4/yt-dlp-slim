@@ -17,7 +17,7 @@
 ########################################
 # Versions
 ARG YT_DLP_VERSION="2026.06.09"
-ARG ALPINE_VERSION="3.24@sha256:8ddefa941e689fc29abcdeb8dae3b3c6d139cc08ce9a52633931160701770685"
+ARG ALPINE_VERSION="3.24@sha256:a2d49ea686c2adfe3c992e47dc3b5e7fa6e6b5055609400dc2acaeb241c829f4"
 
 ################################################################################
 # YT-DLP builder stage
