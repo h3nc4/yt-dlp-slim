@@ -50,7 +50,8 @@ RUN mkdir -p /rootfs/bin && \
   cp --parents /lib/ld-musl-x86_64.so.1 /rootfs
 
 RUN mkdir -p /rootfs/target /rootfs/tmp && \
-  chmod 1777 /rootfs/tmp
+  chmod 1777 /rootfs/tmp && \
+  touch /rootfs/cookies.txt
 
 ################################################################################
 # Final squashed image
@@ -62,7 +63,7 @@ COPY --from=assemble /rootfs /
 WORKDIR /target
 ENV XDG_CACHE_HOME=/tmp/.cache
 # must specify qjs as JS runtime
-ENTRYPOINT ["/bin/yt-dlp", "--js-runtimes", "quickjs:/bin/qjs"]
+ENTRYPOINT ["/bin/yt-dlp", "--js-runtimes", "quickjs:/bin/qjs", "--cookies", "/cookies.txt"]
 CMD ["--help"]
 
 LABEL org.opencontainers.image.title="yt-dlp Slim" \

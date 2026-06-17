@@ -56,7 +56,8 @@ RUN apk add --no-cache gnupg && \
 
 RUN mv /yt-dlp_linux /rootfs/bin/yt-dlp && \
   chmod 755 /rootfs/bin/yt-dlp && \
-  chmod 1777 /rootfs/tmp
+  chmod 1777 /rootfs/tmp && \
+  touch /rootfs/cookies.txt
 
 ################################################################################
 # Final squashed image
@@ -69,7 +70,7 @@ COPY --from=ffmpeg-builder /rootfs/ /
 WORKDIR /target
 ENV XDG_CACHE_HOME=/tmp/.cache
 # deno is yt-dlp's default JS runtime
-ENTRYPOINT ["/bin/yt-dlp"]
+ENTRYPOINT ["/bin/yt-dlp", "--cookies", "/cookies.txt"]
 CMD ["--help"]
 
 LABEL org.opencontainers.image.title="yt-dlp Slim" \

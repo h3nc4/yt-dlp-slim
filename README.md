@@ -36,6 +36,21 @@ Distroless Alpine variant:
 docker run --rm -v "$PWD:/target" h3nc4/yt-dlp-slim:alpine [OPTIONS] URL [URL...]
 ```
 
+## Passing browser cookies
+
+Some sites require authentication. The easiest approach is to export your cookies to a `cookies.txt` file and mount it into the container.
+
+**Recommended extension:** [Get cookies.txt LOCALLY](https://github.com/kairi003/Get-cookies.txt-LOCALLY) — available for [Chrome/Chromium](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc) and [Firefox](https://addons.mozilla.org/en-US/firefox/addon/get-cookies-txt-locally/). It exports cookies in Netscape format directly from your browser without sending data to any server.
+
+Once you have `cookies.txt`, mount it at `/cookies.txt` — the container will pick it up automatically:
+
+```bash
+docker run --rm -u "$(id -u):$(id -g)" \
+  -v "$PWD:/target" \
+  -v "$PWD/cookies.txt:/cookies.txt:ro" \
+  h3nc4/yt-dlp-slim URL
+```
+
 ## License
 
 yt-dlp Slim is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
