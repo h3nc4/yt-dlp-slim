@@ -1,10 +1,15 @@
 # yt-dlp Slim
 
-Distroless Docker container for [yt-dlp](https://github.com/yt-dlp/yt-dlp) with JavaScript and FFmpeg support.
+Docker image for [yt-dlp](https://github.com/yt-dlp/yt-dlp) carrying a JavaScript runtime and FFmpeg, for the sites that need either.
 
-The default image uses [Deno](https://deno.land/) as JavaScript runtime and weighs <400MB.
+Both tags end on `FROM scratch`, so neither holds a shell or a package manager. They differ in what was compiled into them:
 
-An Alpine-based variant with [QuickJS](https://bellard.org/quickjs/) as JavaScript runtime is also available, weighing <120MB.
+| Tag | JavaScript runtime | Compiled against | Size |
+| --- | --- | --- | --- |
+| `latest` | [Deno](https://deno.land/) | Debian, glibc | under 400 MB |
+| `alpine` | [QuickJS](https://bellard.org/quickjs/) | Alpine, musl | under 120 MB |
+
+`alpine` is the one to reach for unless a site needs the full Deno runtime. Its name says what the binaries were built against. The published image itself contains no distribution at all.
 
 ## Usage
 
@@ -20,29 +25,33 @@ yt-dlp() {
 }
 ```
 
-Or wrapper script for [mpv](https://mpv.io/) integration:
+A wrapper script on `PATH` is what [mpv](https://mpv.io/) picks up, since mpv looks for a `yt-dlp` executable rather than a shell function. Writing to `/usr/local/bin` needs root:
 
 ```bash
-tee /usr/local/bin/yt-dlp << 'EOF' >/dev/null
+doas tee /usr/local/bin/yt-dlp << 'EOF' >/dev/null
 #!/bin/sh
 exec docker run --rm -u "$(id -u):$(id -g)" -v "${PWD}:/target" h3nc4/yt-dlp-slim "$@"
 EOF
-chmod +x /usr/local/bin/yt-dlp
+doas chmod +x /usr/local/bin/yt-dlp
 ```
 
-Distroless Alpine variant:
+That name shadows a yt-dlp installed from a package. Pick another one to keep both.
+
+The `alpine` tag takes the same arguments:
 
 ```bash
-docker run --rm -v "$PWD:/target" h3nc4/yt-dlp-slim:alpine [OPTIONS] URL [URL...]
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/target" h3nc4/yt-dlp-slim:alpine [OPTIONS] URL [URL...]
 ```
 
 ## Passing browser cookies
 
-Some sites require authentication. The easiest approach is to export your cookies to a `cookies.txt` file and mount it into the container.
+A site behind a login needs the session cookie. `--cookies-from-browser` cannot reach the host's browser profile from inside a container, so export the cookies to a file and mount that.
 
-**Recommended extension:** [Get cookies.txt LOCALLY](https://github.com/kairi003/Get-cookies.txt-LOCALLY) — available for [Chrome/Chromium](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc) and [Firefox](https://addons.mozilla.org/en-US/firefox/addon/get-cookies-txt-locally/). It exports cookies in Netscape format directly from your browser without sending data to any server.
+[Get cookies.txt LOCALLY](https://github.com/kairi003/Get-cookies.txt-LOCALLY) writes the Netscape format yt-dlp expects, for [Chrome and Chromium](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc) or [Firefox](https://addons.mozilla.org/en-US/firefox/addon/get-cookies-txt-locally/). It is third-party code, so read its source and permissions before trusting a logged-in session to it.
 
-Once you have `cookies.txt`, mount it at `/cookies.txt` — the container will pick it up automatically:
+A `cookies.txt` is a live credential for every site in it. Keep it at mode 600, mount it read-only, and export again rather than keeping an old one around.
+
+Mount the file at `/cookies.txt` and the container picks it up without a flag:
 
 ```bash
 docker run --rm -u "$(id -u):$(id -g)" \
@@ -69,6 +78,8 @@ Where tor runs as a container of its own, join its network and name it instead, 
 Throughput is a fraction of a direct download, and some sites refuse an exit node outright, which reads as a 403 or a bot check rather than as a proxy failure.
 
 ## License
+
+<!-- vale off -->
 
 yt-dlp Slim is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
