@@ -51,6 +51,23 @@ docker run --rm -u "$(id -u):$(id -g)" \
   h3nc4/yt-dlp-slim URL
 ```
 
+## Downloading through tor
+
+A tor daemon binds its SocksPort to loopback, and a container with a namespace of its own has a different loopback, so it needs the host's:
+
+```bash
+docker run --rm --network host -u "$(id -u):$(id -g)" -v "$PWD:/target" \
+  h3nc4/yt-dlp-slim --proxy socks5h://127.0.0.1:9050 URL
+```
+
+The `h` in `socks5h` sends each lookup through the circuit. Plain `socks5` resolves the hostname locally first, which hands every domain visited to whatever resolver the host is configured with.
+
+**ffmpeg takes no SOCKS proxy.** An HLS or DASH stream handed to it leaves direct while everything else is tunnelled, so add `--downloader "m3u8:native"` to keep the fetching inside yt-dlp. The merge at the end is local and reaches no network.
+
+Where tor runs as a container of its own, join its network and name it instead, `--proxy socks5h://tor:9050`. Its `SocksPolicy` has to accept the address the request arrives from, which is the yt-dlp container rather than the host.
+
+Throughput is a fraction of a direct download, and some sites refuse an exit node outright, which reads as a 403 or a bot check rather than as a proxy failure.
+
 ## License
 
 yt-dlp Slim is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
