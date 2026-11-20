@@ -25,10 +25,8 @@ jobs:
         include:
           - dockerfile: Dockerfile
             tag: latest
-            sha_prefix: ""
           - dockerfile: alpine.Dockerfile
             tag: alpine
-            sha_prefix: "alpine-"
     steps:
       - name: Run actions/checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -43,10 +41,6 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Get short SHA
-        id: sha
-        run: echo "short=${GITHUB_SHA::7}" >>"${GITHUB_OUTPUT}"
-
       - name: Name the published image
         run: echo "IMAGE=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')" >>"${GITHUB_ENV}"
 
@@ -58,6 +52,5 @@ jobs:
           context: .
           file: ./${{ matrix.dockerfile }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-            ${{ env.IMAGE }}:${{ matrix.tag }}
-            ${{ env.IMAGE }}:${{ matrix.sha_prefix }}${{ steps.sha.outputs.short }}
+          tags: ${{ env.IMAGE }}:${{ matrix.tag }}
+          labels: org.opencontainers.image.revision=${{ github.sha }}
