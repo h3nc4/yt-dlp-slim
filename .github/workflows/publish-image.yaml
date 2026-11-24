@@ -15,7 +15,7 @@ on:
     paths:
       - "Dockerfile"
       - "alpine.Dockerfile"
-      - ".github/workflows/publish-image.yaml"
+      - ".github/workflows/**"
 
 jobs:
   build-push:
