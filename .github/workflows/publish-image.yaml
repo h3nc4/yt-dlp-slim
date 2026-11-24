@@ -11,6 +11,7 @@ on:
   pull_request:
     branches:
       - "main"
+      - "deps"
     paths:
       - "Dockerfile"
       - "alpine.Dockerfile"
