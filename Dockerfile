@@ -16,7 +16,7 @@
 
 ########################################
 # Versions
-ARG YT_DLP_VERSION="2026.10.26"
+ARG YT_DLP_VERSION="2026.11.23"
 
 ################################################################################
 # Deno builder stage
@@ -24,7 +24,7 @@ FROM denoland/deno:bin-2.6.6@sha256:9f18d20207f2699595ea26d14e0b7e123cd0cd01100a
 
 ################################################################################
 # FFmpeg builder stage
-FROM debian:13-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2 AS ffmpeg-builder
+FROM debian:13-slim@sha256:8aa5a7bf5a1955bddbe7d74fcdd0b91ab30e74362a8b73af672b0481b35b44a0 AS ffmpeg-builder
 RUN apt-get update && \
   apt-get install -y --no-install-recommends ffmpeg
 RUN mkdir -p /rootfs/bin && \
